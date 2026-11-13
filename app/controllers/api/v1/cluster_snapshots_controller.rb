@@ -33,7 +33,7 @@ module Api
       end
 
       def create
-        target_class = params[:target_type].to_s.downcase == "city" ? City : Country
+        target_class = resolve_target_class(params[:target_type])
         level = (params[:level] || 5).to_i.clamp(1, 15)
         full_coverage = boolean_param(:full_coverage, default: false) || level >= 15
 
@@ -54,6 +54,15 @@ module Api
       def destroy
         @snapshot.destroy!
         render_success({ id: @snapshot.id, title: @snapshot.title, deleted: true })
+      end
+
+      private
+
+      def resolve_target_class(param)
+        case param.to_s.downcase
+        when "celestialbody", "celestial_body", "celestial_bodies" then CelestialBody
+        else StarSystem
+        end
       end
 
       private

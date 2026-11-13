@@ -211,10 +211,10 @@ class GenerateClusterReportJob < ApplicationJob
 
   def eager_associations(target_type)
     case target_type
-    when "Country"
-      { record: :continent }
-    when "City"
-      { record: { country: :continent } }
+    when "StarSystem"
+      { record: :cosmic_structure }
+    when "CelestialBody"
+      { record: { star_system: :cosmic_structure } }
     else
       :record
     end
