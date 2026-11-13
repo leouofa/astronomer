@@ -41,8 +41,12 @@ class GenerateClusterReportJobTest < ActiveSupport::TestCase
       content: "# Patterns in the Maritime Realm\n\nExecutive Summary: Sovereign states negotiate maritime boundaries."
     )
 
+    recorded_cluster_prompts = []
     fake_cluster_chat = Object.new
-    fake_cluster_chat.define_singleton_method(:ask) { |_prompt| fake_cluster_response }
+    fake_cluster_chat.define_singleton_method(:ask) do |prompt|
+      recorded_cluster_prompts << prompt
+      fake_cluster_response
+    end
 
     fake_report_chat = Object.new
     fake_report_chat.define_singleton_method(:ask) { |_prompt| fake_report_response }
@@ -57,6 +61,9 @@ class GenerateClusterReportJobTest < ActiveSupport::TestCase
     assert_equal "Patterns in the Maritime Realm", @report.title
     assert_includes @report.content, "Executive Summary"
     assert_not_nil @report.completed_at
+    assert_equal 1, recorded_cluster_prompts.size
+    assert_includes recorded_cluster_prompts.first, "astrophysical archetype patterns and motifs"
+    assert_not_includes recorded_cluster_prompts.first, "statecraft"
   end
 
   test "handles error and marks failed" do
