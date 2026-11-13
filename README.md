@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/logo.jpg" alt="Astronomer Logo" width="600" />
+  <img src="docs/images/logo.jpg" alt="Astronomer Logo" width="400" />
 </p>
 
 # Astronomer: A Computational Laboratory for Comparative Astrophysics, Stellar Systems, and Celestial Body Manifolds
@@ -87,7 +87,7 @@ flowchart TD
 
 ```bash
 # Clone the repository
-git clone https://github.com/leouofa/syncretica.git astronomer
+git clone https://github.com/leouofa/astronomer.git
 cd astronomer
 
 # Install dependencies
