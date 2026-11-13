@@ -72,7 +72,7 @@ class GenerateClusterReportJob < ApplicationJob
         cluster_members_detail: group_detail
       )
 
-      cluster_inquiry = "Synthesize this cluster's statecraft and geopolitical archetype patterns and motifs specifically answering: #{report.prompt}"
+      cluster_inquiry = "Synthesize this cluster's astrophysical archetype patterns and motifs specifically answering: #{report.prompt}"
       response = chat.ask(cluster_inquiry)
 
       cleaned_summary = clean_markdown(response.content)
@@ -211,10 +211,10 @@ class GenerateClusterReportJob < ApplicationJob
 
   def eager_associations(target_type)
     case target_type
-    when "Country"
-      { record: :continent }
-    when "City"
-      { record: { country: :continent } }
+    when "StarSystem"
+      { record: :cosmic_structure }
+    when "CelestialBody"
+      { record: { star_system: :cosmic_structure } }
     else
       :record
     end
