@@ -1,0 +1,29 @@
+<% content_for :title, "Planets & Celestial Bodies | Astronomer" %>
+
+<%= turbo_stream_from PopulateCelestialBodiesJob::GLOBAL_STREAM_NAME %>
+
+<div class="w-full max-w-5xl mx-auto space-y-8 pb-16">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-slate-200 pb-6">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900">Planets / Celestial Bodies</h1>
+      <p class="mt-2 text-sm text-slate-600">
+        <%= @total_celestial_bodies_count %> celestial bodies cataloged across <%= @star_systems_count %> star systems.
+      </p>
+    </div>
+
+    <div class="shrink-0">
+      <%= render "pages/populate_controls",
+                 running: false,
+                 action_path: populate_celestial_bodies_path,
+                 button_label: "Discover Celestial Bodies",
+                 controls_target: "populate_all_celestial_bodies_controls",
+                 status_message: notice,
+                 status_kind: (notice.present? ? :info : nil) %>
+    </div>
+  </header>
+
+  <%= render "pages/celestial_bodies_list",
+             star_system_groups: @star_system_groups,
+             total_celestial_bodies_count: @total_celestial_bodies_count,
+             star_systems_count: @star_systems_count %>
+</div>

@@ -1,0 +1,89 @@
+# frozen_string_literal: true
+
+class CelestialBody < ApplicationRecord
+  include Embeddable
+
+  belongs_to :star_system
+  has_one :cosmic_structure, through: :star_system
+
+  normalizes :name, with: ->(value) { value.to_s.squish }
+  normalizes :description, with: ->(value) { value.to_s.strip }
+  normalizes :themes, with: ->(value) { normalize_themes(value) }
+
+  validates :name, presence: true, uniqueness: { scope: :star_system_id, case_sensitive: false }
+  validates :description, presence: true
+  validate :themes_must_be_string_array
+
+  scope :ordered, -> { order(:name) }
+
+  def embedding_input
+    lines = [
+      "Celestial Body: #{name} (#{star_system.name}, #{star_system.cosmic_structure.name})",
+      "Description: #{description}"
+    ]
+    lines << "Themes: #{themes.join(', ')}" if themes.any?
+    lines.join("\n")
+  end
+
+  # Returns [star_system, Array<CelestialBody>] pairs ordered by cosmic structure name then star system name then body name.
+  def self.grouped_by_star_system
+    includes(star_system: :cosmic_structure)
+      .joins(star_system: :cosmic_structure)
+      .order("cosmic_structures.name ASC, star_systems.name ASC, celestial_bodies.name ASC")
+      .group_by(&:star_system)
+      .to_a
+  end
+
+  # Upserts an enumerable of { name:, description:, themes: } entries scoped to
+  # the given star system, matching case-insensitively on normalized name.
+  def self.upsert_batch!(star_system, entries)
+    raise ArgumentError, "star_system must be present" if star_system.nil?
+
+    transaction do
+      Array(entries).filter_map do |entry|
+        attrs = entry.respond_to?(:to_h) ? entry.to_h.symbolize_keys : {}
+        name = attrs[:name].to_s.squish
+        description = attrs[:description].to_s.strip
+        next if name.blank? || description.blank?
+
+        themes = normalize_themes(attrs[:themes])
+        upsert_one!(star_system: star_system, name: name, description: description, themes: themes)
+      end
+    end
+  end
+
+  def self.normalize_themes(value)
+    items =
+      case value
+      when Array
+        value
+      when String
+        value.split(",")
+      else
+        []
+      end
+
+    items.filter_map { |item| item.to_s.squish.presence }.uniq(&:downcase)
+  end
+
+  def self.upsert_one!(star_system:, name:, description:, themes:)
+    scope = star_system.celestial_bodies
+    record = scope.where("LOWER(name) = ?", name.downcase).first_or_initialize
+    record.assign_attributes(name: name, description: description, themes: themes)
+    record.save!
+    record
+  rescue ActiveRecord::RecordNotUnique
+    record = scope.where("LOWER(name) = ?", name.downcase).first!
+    record.update!(name: name, description: description, themes: themes)
+    record
+  end
+  private_class_method :upsert_one!
+
+  private
+
+  def themes_must_be_string_array
+    unless themes.is_a?(Array) && themes.all? { |item| item.is_a?(String) && item.present? }
+      errors.add(:themes, "must be a list of non-empty strings")
+    end
+  end
+end
