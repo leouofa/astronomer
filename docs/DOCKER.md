@@ -121,6 +121,20 @@ OLLAMA_MODEL=Qwen3.6-35B-A3B-NVFP4
 If you run Ollama on another workstation over Tailscale, point `OLLAMA_API_BASE`
 to its Tailscale IP directly (e.g. `http://100.95.26.48:1919/v1`).
 
+Embeddings are configured separately from chat and may point at a different
+Ollama instance:
+
+```sh
+# In Docker Compose, reach an Ollama running on the host:
+EMBEDDING_API_BASE=http://host.docker.internal:11434/v1
+EMBEDDING_MODEL=qwen3-embedding:0.6b
+```
+
+When running `bin/dev` on the host instead, use
+`EMBEDDING_API_BASE=http://localhost:11434/v1`. Leaving these unset falls back to
+`http://localhost:11434/v1`, which is unreachable from inside the containers.
+Restart `web` and `jobs` after changing them, because `.env` is read at boot.
+
 ### Accessing over Tailscale and other devices
 
 The web service binds to `0.0.0.0:3004`. Rails in `development.rb` is preconfigured
