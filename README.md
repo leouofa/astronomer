@@ -76,6 +76,13 @@ flowchart TD
 
 ## Installation & Local Laboratory Setup
 
+> [!TIP]
+> **Prefer running with Docker?** You can run the entire development stack (Rails on port 3004, Sidekiq, Tailwind watcher, Redis, and PostgreSQL with pgvector) in Docker Compose:
+> ```sh
+> docker compose up -d --build
+> ```
+> See [docs/DOCKER.md](docs/DOCKER.md) for full details, Tailscale access, volume persistence, and everyday commands.
+
 ### Prerequisites
 
 - **Ruby 3.4+**
